@@ -3,6 +3,8 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import morgan from 'morgan';
 import connectDB from './config/db.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 // Load env vars
 dotenv.config();
@@ -21,17 +23,26 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
+// Get directory path for serving static files
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // Default route
 app.get('/', (req, res) => {
   res.json({ message: 'Welcome to JobPortal API' });
 });
 
+// Serve static files from uploads folder
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
 // Define Routes
 import authRoutes from './routes/authRoutes.js';
-
+import profileRoutes from './routes/jobseeker/profileRoutes.js';
+import cvRoutes from './routes/jobseeker/cvRoutes.js';
 
 app.use('/api/auth', authRoutes);
-
+app.use('/api/profiles', profileRoutes);
+app.use('/api/cv', cvRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

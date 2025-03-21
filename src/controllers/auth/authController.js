@@ -1,4 +1,4 @@
-import User from '../models/User.js';
+import User from '../../models/User.js';
 
 // Get token from model, create cookie and send response
 const sendTokenResponse = (user, statusCode, res) => {
