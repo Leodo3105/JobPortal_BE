@@ -5,9 +5,20 @@ const sendTokenResponse = (user, statusCode, res) => {
   // Create token
   const token = user.getSignedJwtToken();
 
+  // Prepare user data (without sensitive info)
+  const userData = {
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    avatar: user.avatar,
+    avatarUrl: `/uploads/avatars/${user.avatar}`
+  };
+
   res.status(statusCode).json({
     success: true,
-    token
+    token,
+    user: userData
   });
 };
 
@@ -131,9 +142,23 @@ export const getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
 
+    // Prepare user data
+    const userData = {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      phone: user.phone,
+      avatar: user.avatar,
+      avatarUrl: `/uploads/avatars/${user.avatar}`,
+      emailVerified: user.emailVerified,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt
+    };
+
     res.status(200).json({
       success: true,
-      data: user
+      data: userData
     });
   } catch (error) {
     res.status(400).json({

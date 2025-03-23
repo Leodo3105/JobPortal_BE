@@ -8,9 +8,13 @@ import {
   deleteExperience,
   getAllProfiles,
   getProfileById,
-  deleteProfile
+  deleteProfile,
+  uploadAvatar,   
+  resetAvatar,    
+  getAvatar
 } from '../../controllers/jobseeker/profileController.js';
 import { protect, authorize } from '../../middlewares/auth.js';
+import avatarUpload from '../../middlewares/uploads/avatarUpload.js';
 
 const router = express.Router();
 
@@ -18,6 +22,7 @@ const router = express.Router();
 router.route('/')
   .get(protect, getCurrentProfile)
   .post(protect, authorize('jobseeker'), createOrUpdateProfile)
+  .put(protect, authorize('jobseeker'), createOrUpdateProfile)
   .delete(protect, deleteProfile);
 
 router.get('/all', getAllProfiles);
@@ -34,5 +39,14 @@ router.route('/experience')
 
 router.route('/experience/:exp_id')
   .delete(protect, authorize('jobseeker'), deleteExperience);
+
+// Upload avatar
+router.put('/avatar', protect, authorize('jobseeker'), avatarUpload.single('avatar'), uploadAvatar);
+
+// Reset avatar to default
+router.delete('/avatar', protect, authorize('jobseeker'), resetAvatar);
+
+// Get avatar
+router.get('/avatar/:filename', getAvatar);
 
 export default router;

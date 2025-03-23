@@ -1,5 +1,8 @@
 import JobseekerProfile from '../../models/jobseeker/Profile.js';
 import User from '../../models/User.js';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 // Get current user profile
 export const getCurrentProfile = async (req, res) => {
@@ -377,6 +380,111 @@ export const deleteProfile = async (req, res) => {
     });
   } catch (error) {
     console.error('Delete profile error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Server Error'
+    });
+  }
+};
+
+// Get directory path
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Upload user avatar
+export const uploadAvatar = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        error: 'Vui lòng upload file ảnh'
+      });
+    }
+
+    // Get user
+    const user = await User.findById(req.user.id);
+
+    // Delete old avatar if it's not the default
+    if (user.avatar !== 'default-avatar.jpg') {
+      const oldAvatarPath = path.join(__dirname, '../../../uploads/avatars', user.avatar);
+      if (fs.existsSync(oldAvatarPath)) {
+        fs.unlinkSync(oldAvatarPath);
+      }
+    }
+
+    // Update user avatar
+    user.avatar = req.file.filename;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      data: {
+        avatar: req.file.filename,
+        avatarUrl: `/uploads/avatars/${req.file.filename}`
+      },
+      message: 'Avatar đã được cập nhật'
+    });
+  } catch (error) {
+    console.error('Avatar upload error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+};
+
+// Delete user avatar (reset to default)
+export const resetAvatar = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    // Delete current avatar if not default
+    if (user.avatar !== 'default-avatar.jpg') {
+      const avatarPath = path.join(__dirname, '../../../uploads/avatars', user.avatar);
+      if (fs.existsSync(avatarPath)) {
+        fs.unlinkSync(avatarPath);
+      }
+
+      // Reset to default avatar
+      user.avatar = 'default-avatar.jpg';
+      await user.save();
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Đã khôi phục avatar mặc định'
+    });
+  } catch (error) {
+    console.error('Avatar reset error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+};
+
+// Get user avatar
+export const getAvatar = async (req, res) => {
+  try {
+    const filename = req.params.filename;
+    
+    // If default avatar, serve from static folder
+    if (filename === 'default-avatar.jpg') {
+      return res.sendFile(path.join(__dirname, '../../../uploads/avatars/default-avatar.jpg'));
+    }
+    
+    const avatarPath = path.join(__dirname, '../../../uploads/avatars', filename);
+    
+    if (!fs.existsSync(avatarPath)) {
+      return res.status(404).json({
+        success: false,
+        error: 'Không tìm thấy avatar'
+      });
+    }
+    
+    res.sendFile(avatarPath);
+  } catch (error) {
+    console.error('Get avatar error:', error);
     res.status(500).json({
       success: false,
       error: 'Server Error'
