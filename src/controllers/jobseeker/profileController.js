@@ -406,7 +406,7 @@ export const uploadAvatar = async (req, res) => {
 
     // Delete old avatar if it's not the default
     if (user.avatar !== 'default-avatar.jpg') {
-      const oldAvatarPath = path.join(__dirname, '../../../uploads/avatars', user.avatar);
+      const oldAvatarPath = path.join(__dirname, '../../uploads/avatars', user.avatar);
       if (fs.existsSync(oldAvatarPath)) {
         fs.unlinkSync(oldAvatarPath);
       }
@@ -440,7 +440,7 @@ export const resetAvatar = async (req, res) => {
 
     // Delete current avatar if not default
     if (user.avatar !== 'default-avatar.jpg') {
-      const avatarPath = path.join(__dirname, '../../../uploads/avatars', user.avatar);
+      const avatarPath = path.join(__dirname, '../../uploads/avatars', user.avatar);
       if (fs.existsSync(avatarPath)) {
         fs.unlinkSync(avatarPath);
       }
@@ -470,10 +470,10 @@ export const getAvatar = async (req, res) => {
     
     // If default avatar, serve from static folder
     if (filename === 'default-avatar.jpg') {
-      return res.sendFile(path.join(__dirname, '../../../uploads/avatars/default-avatar.jpg'));
+      return res.sendFile(path.join(__dirname, '../../uploads/avatars/default-avatar.jpg'));
     }
     
-    const avatarPath = path.join(__dirname, '../../../uploads/avatars', filename);
+    const avatarPath = path.join(__dirname, '../../uploads/avatars', filename);
     
     if (!fs.existsSync(avatarPath)) {
       return res.status(404).json({
